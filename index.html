@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Бизнес Дневник</title>
+    <link rel="icon" href="icon-business-diary.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f0edf5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px;
+            margin: 0;
+        }
+
+        .diary-wrapper {
+            max-width: 480px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px 28px 20px 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10), 0 4px 16px rgba(0, 0, 0, 0.05);
+            padding: 18px 16px 24px;
+            position: relative;
+            border: 1px solid #e5dcec;
+            transition: all 0.2s;
+        }
+
+        /* Шапка */
+        .diary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e5dcec;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .diary-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4a3f5c;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .diary-header h1 span {
+            font-size: 26px;
+        }
+
+        .diary-header .subtitle {
+            font-size: 13px;
+            color: #8b7aa3;
+            background: #f0edf5;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+        }
+
+        /* Навигация по дням */
+        .day-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0 12px;
+        }
+
+        .day-nav button {
+            background: #f0edf5;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #4a3f5c;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid #ddd4e8;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .day-nav button:active {
+            background: #ddd4e8;
+            transform: scale(0.94);
+        }
+
+        .day-nav .day-indicator {
+            font-size: 18px;
+            font-weight: 600;
+            color: #3d3350;
+            background: #f5f0fa;
+            padding: 6px 20px;
+            border-radius: 60px;
+            border: 1px solid #ddd4e8;
+            min-width: 130px;
+            text-align: center;
+        }
+
+        .day-nav .weekday {
+            font-weight: 400;
+            font-size: 14px;
+            color: #8b7aa3;
+        }
+
+        /* Вкладки (7 штук) */
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 4px;
+            margin: 12px 0 14px;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tabs::-webkit-scrollbar {
+            height: 3px;
+        }
+        .tabs::-webkit-scrollbar-thumb {
+            background: #cbb8dd;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 0 0 auto;
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #ddd4e8;
+            background: #f5f0fa;
+            font-size: 13px;
+            font-weight: 500;
+            color: #5a4d72;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: #7b5ea7;
+            color: #fff;
+            border-color: #7b5ea7;
+            box-shadow: 0 2px 8px rgba(123, 94, 167, 0.25);
+        }
+
+        .tab-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Контент вкладок */
+        .tab-content {
+            display: none;
+            background: #faf8fc;
+            border-radius: 20px;
+            padding: 16px 14px;
+            border: 1px solid #e8e0f0;
+            min-height: 280px;
+            transition: all 0.2s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Общие стили для полей */
+        .field-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .field-row label {
+            font-weight: 500;
+            color: #4a3f5c;
+            font-size: 14px;
+            min-width: 70px;
+        }
+
+        .field-row input, .field-row select, .field-row textarea {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd4e8;
+            border-radius: 12px;
+            font-size: 14px;
+            background: #ffffff;
+            color: #2d2438;
+            outline: none;
+            transition: border 0.15s;
+            min-width: 60px;
+        }
+
+        .field-row input:focus, .field-row select:focus, .field-row textarea:focus {
+            border-color: #7b5ea7;
+            box-shadow: 0 0 0 3px rgba(123, 94, 167, 0.12);
+        }
+
+        .field-row textarea {
+            resize: vertical;
+            min-height: 40px;
+            font-family: inherit;
+        }
+
+        .field-row .check-btn {
+            font-size: 22px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 8px;
+            transition: background 0.1s;
+        }
+
+        .field-row .check-btn:hover {
+            background: #eee8f5;
+        }
+
+        .field-row .check-btn.active-check {
+            color: #4caf50;
+        }
+        .field-row .check-btn.active-cross {
+            color: #e74c3c;
+        }
+
+        /* Таблицы для доходов и персонализации */
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .mini-table th {
+            background: #ede6f5;
+            color: #4a3f5c;
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #d5c8e0;
+        }
+
+        .mini-table td {
+            padding: 6px 6px;
+            border-bottom: 1px solid #e8e0f0;
+            vertical-align: middle;
+        }
+
+        .mini-table input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd4e8;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #fff;
+            outline: none;
+        }
+
+        .mini-table input:focus {
+            border-color: #7b5ea7;
+        }
+
+        .mini-table .sum-row {
+            font-weight: 600;
+            background: #f5f0fa;
+        }
+
+        .mini-table .sum-row td {
+            border-top: 2px solid #d5c8e0;
+            padding: 8px 6px;
+        }
+
+        .mini-table .profit-row {
+            background: #e8f0e8;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .mini-table .profit-row td {
+            border-top: 2px solid #a8c8a8;
+            padding: 10px 6px;
+        }
+
+        .add-row-btn {
+            background: #ede6f5;
+            border: none;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            color: #4a3f5c;
+            cursor: pointer;
+            margin-top: 6px;
+            border: 1px solid #ddd4e8;
+        }
+
+        .add-row-btn:active {
+            background: #ddd4e8;
+        }
+
+        /* Рацион - сетка */
+        .meal-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 6px 10px;
+            align-items: center;
+        }
+
+        .meal-grid label {
+            font-weight: 500;
+            color: #4a3f5c;
+            font-size: 14px;
+        }
+
+        .meal-grid input {
+            padding: 6px 10px;
+            border: 1px solid #ddd4e8;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #fff;
+            outline: none;
+        }
+
+        .meal-grid input:focus {
+            border-color: #7b5ea7;
+        }
+
+        .meal-grid .meal-label {
+            font-weight: 600;
+            color: #5a4d72;
+        }
+
+        /* Заметки с чёрточками */
+        .notes-area {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px 14px;
+            border: 1px solid #ddd4e8;
+            border-radius: 14px;
+            font-size: 14px;
+            background: #fff;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.8;
+            background-image: repeating-linear-gradient(transparent, transparent 29px, #e0d6ea 29px, #e0d6ea 30px);
+            background-size: 100% 30px;
+            background-position: 0 8px;
+        }
+
+        .notes-area:focus {
+            border-color: #7b5ea7;
+        }
+
+        /* Итог недели */
+        .week-summary {
+            background: #faf5e8;
+            border: 2px solid #e8d5a8;
+            border-radius: 20px;
+            padding: 16px;
+        }
+
+        .week-summary h3 {
+            color: #8b7a4a;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        .week-summary .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e0d0b0;
+            font-size: 15px;
+        }
+
+        .week-summary .summary-item.total {
+            font-weight: 700;
+            font-size: 17px;
+            border-bottom: 2px solid #c8b080;
+            padding-top: 10px;
+            margin-top: 6px;
+        }
+
+        /* Подвал */
+        .footer-app {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #b0a0c0;
+            letter-spacing: 1px;
+            border-top: 1px solid #e5dcec;
+            padding-top: 12px;
+        }
+
+        .footer-app strong {
+            color: #7b5ea7;
+            font-weight: 500;
+        }
+
+        /* Адаптив */
+        @media (max-width: 450px) {
+            .diary-wrapper {
+                padding: 12px 10px;
+            }
+            .diary-header h1 {
+                font-size: 20px;
+            }
+            .tab-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            .field-row {
+                flex-wrap: wrap;
+            }
+            .field-row label {
+                min-width: 60px;
+                font-size: 13px;
+            }
+            .field-row input, .field-row select {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+            .meal-grid {
+                grid-template-columns: 1fr 1.5fr;
+                gap: 4px 8px;
+            }
+            .day-nav .day-indicator {
+                font-size: 15px;
+                min-width: 100px;
+                padding: 4px 12px;
+            }
+            .day-nav button {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+                padding: 0;
+            }
+        }
+
+        /* Анимация переключения */
+        .tab-content.active {
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0.6; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="diary-wrapper" id="app">
+    <!-- Шапка -->
+    <div class="diary-header">
+        <h1><span>📒</span> Бизнес дневник</h1>
+        <span class="subtitle">Supervisor</span>
+    </div>
+
+    <!-- Навигация по дням -->
+    <div class="day-nav">
+        <button id="prevDayBtn">◀</button>
+        <span class="day-indicator" id="dayIndicator">
+            <span id="dayName">Понедельник</span><br>
+            <span class="weekday" id="dayDate">15 июля</span>
+        </span>
+        <button id="nextDayBtn">▶</button>
+    </div>
+
+    <!-- Вкладки -->
+    <div class="tabs" id="tabsContainer">
+        <button class="tab-btn active" data-tab="0">Встречи</button>
+        <button class="tab-btn" data-tab="1">Бизнес</button>
+        <button class="tab-btn" data-tab="2">Персонал</button>
+        <button class="tab-btn" data-tab="3">Сканы</button>
+        <button class="tab-btn" data-tab="4">Доходы</button>
+        <button class="tab-btn" data-tab="5">Рацион</button>
+        <button class="tab-btn" data-tab="6">Заметки</button>
+    </div>
+
+    <!-- Контейнер для контента -->
+    <div id="contentContainer">
+        <!-- Контент будет вставлен через JS -->
+    </div>
+
+    <!-- Подвал -->
+    <div class="footer-app">
+        <strong>Бизнес дневник</strong> · Herbalife Supervisor
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ==================== ДАННЫЕ ====================
+        const STORAGE_KEY = 'business_diary_data_v2';
+
+        // Дни недели
+        const DAYS = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье', 'Итог недели'];
+        const DAYS_SHORT = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС', 'Итог'];
+
+        // Структура дня
+        function createEmptyDay() {
+            return {
+                // Встречи: массив { time, with, status: 'check' | 'cross' | '' }
+                meetings: [{ time: '10:00', with: '', status: '' }],
+                // Бизнес: массив { time, with, status }
+                business: [{ time: '12:00', with: '', status: '' }],
+                // Персонализация: массив { name, need, bought: false, income: 0 }
+                personal: [{ name: '', need: '', bought: false, income: 0 }],
+                // Сканы
+                scans: { count: 0, registered: 0, newClients: 0 },
+                // Доходы: { sales: [{ name, amount }], expenses: [{ name, amount }] }
+                income: {
+                    sales: [{ name: '', amount: 0 }],
+                    expenses: [{ name: '', amount: 0 }]
+                },
+                // Рацион
+                meal: {
+                    breakfast: '',
+                    snack1: '',
+                    lunch: '',
+                    snack2: '',
+                    dinner: '',
+                    snack3: '',
+                    water: 0,
+                    protein: 0,
+                    weightChange: 0
+                },
+                // Заметки
+                notes: ''
+            };
+        }
+
+        // Загрузить все данные
+        function loadAllData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    // Миграция: добавим недостающие поля
+                    for (const key in parsed) {
+                        const day = parsed[key];
+                        if (!day.meetings) day.meetings = [{ time: '10:00', with: '', status: '' }];
+                        if (!day.business) day.business = [{ time: '12:00', with: '', status: '' }];
+                        if (!day.personal) day.personal = [{ name: '', need: '', bought: false, income: 0 }];
+                        if (!day.scans) day.scans = { count: 0, registered: 0, newClients: 0 };
+                        if (!day.income) day.income = { sales: [{ name: '', amount: 0 }], expenses: [{ name: '', amount: 0 }] };
+                        if (!day.meal) day.meal = { breakfast: '', snack1: '', lunch: '', snack2: '', dinner: '', snack3: '', water: 0, protein: 0, weightChange: 0 };
+                        if (day.notes === undefined) day.notes = '';
+                    }
+                    return parsed;
+                }
+            } catch (e) {}
+            return {};
+        }
+
+        function saveAllData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function getDayData(dateKey) {
+            const all = loadAllData();
+            if (!all[dateKey]) {
+                all[dateKey] = createEmptyDay();
+                saveAllData(all);
+            }
+            return all[dateKey];
+        }
+
+        function saveDayData(dateKey, dayData) {
+            const all = loadAllData();
+            all[dateKey] = dayData;
+            saveAllData(all);
+        }
+
+        // ==================== СОСТОЯНИЕ ====================
+        let currentDayIndex = 0; // 0-6 = дни, 7 = итог недели
+        let currentTabIndex = 0; // 0-6
+        let currentDate = new Date();
+        // Получаем начало недели (понедельник)
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff);
+            d.setHours(0, 0, 0, 0);
+            return d;
+        }
+
+        let weekStart = getMonday(new Date());
+
+        function getDateKey(dayOffset) {
+            const d = new Date(weekStart);
+            d.setDate(d.getDate() + dayOffset);
+            return d.toISOString().split('T')[0];
+        }
+
+        function getDateString(dayOffset) {
+            const d = new Date(weekStart);
+            d.setDate(d.getDate() + dayOffset);
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+        }
+
+        // ==================== РЕНДЕРИНГ ====================
+        function render() {
+            const container = document.getElementById('contentContainer');
+            const dayNameEl = document.getElementById('dayName');
+            const dayDateEl = document.getElementById('dayDate');
+
+            // Обновляем индикатор дня
+            if (currentDayIndex === 7) {
+                dayNameEl.textContent = 'Итог недели';
+                dayDateEl.textContent = '';
+            } else {
+                dayNameEl.textContent = DAYS[currentDayIndex];
+                dayDateEl.textContent = getDateString(currentDayIndex);
+            }
+
+            // Рендерим контент
+            if (currentDayIndex === 7) {
+                container.innerHTML = renderWeekSummary();
+            } else {
+                container.innerHTML = renderDay(currentDayIndex);
+            }
+
+            // Активируем нужную вкладку
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === currentTabIndex);
+            });
+
+            // Показываем нужный tab-content
+            const contents = container.querySelectorAll('.tab-content');
+            contents.forEach((el, idx) => {
+                el.classList.toggle('active', idx === currentTabIndex);
+            });
+
+            // Привязываем события
+            attachEvents();
+            updateWeekSummary();
+        }
+
+        // ==================== РЕНДЕР ДНЯ ====================
+        function renderDay(dayOffset) {
+            const dateKey = getDateKey(dayOffset);
+            const dayData = getDayData(dateKey);
+
+            // 7 вкладок
+            const tabs = [
+                renderMeetings(dayData.meetings),
+                renderBusiness(dayData.business),
+                renderPersonal(dayData.personal),
+                renderScans(dayData.scans),
+                renderIncome(dayData.income),
+                renderMeal(dayData.meal),
+                renderNotes(dayData.notes)
+            ];
+
+            return tabs.map((html, idx) => `
+                <div class="tab-content ${idx === currentTabIndex ? 'active' : ''}" data-tab="${idx}">
+                    ${html}
+                </div>
+            `).join('');
+        }
+
+        // ---- Встречи ----
+        function renderMeetings(meetings) {
+            let rows = meetings.map((m, i) => `
+                <tr>
+                    <td><input type="time" value="${m.time}" data-meeting-time="${i}" class="meeting-time"></td>
+                    <td><input type="text" value="${m.with}" placeholder="С кем" data-meeting-with="${i}" class="meeting-with"></td>
+                    <td style="text-align:center;">
+                        <button class="check-btn ${m.status === 'check' ? 'active-check' : ''}" data-meeting-status="${i}" data-status="check">✅</button>
+                        <button class="check-btn ${m.status === 'cross' ? 'active-cross' : ''}" data-meeting-status="${i}" data-status="cross">❌</button>
+                    </td>
+                    <td><button class="remove-row-btn" data-meeting-remove="${i}">✖</button></td>
+                </tr>
+            `).join('');
+
+            return `
+                <div style="margin-bottom:10px;font-weight:600;color:#4a3f5c;">📅 Встречи</div>
+                <table class="mini-table">
+                    <thead><tr><th>Время</th><th>С кем</th><th>Статус</th><th></th></tr></thead>
+                    <tbody id="meetingsBody">${rows}</tbody>
+                </table>
+                <button class="add-row-btn" data-add-meeting>➕ Добавить встречу</button>
+            `;
+        }
+
+        // ---- Бизнес ----
+        function renderBusiness(business) {
+            let rows = business.map((m, i) => `
+                <tr>
+                    <td><input type="time" value="${m.time}" data-business-time="${i}" class="business-time"></td>
+                    <td><input type="text" value="${m.with}" placeholder="С кем" data-business-with="${i}" class="business-with"></td>
+                    <td style="text-align:center;">
+                        <button class="check-btn ${m.status === 'check' ? 'active-check' : ''}" data-business-status="${i}" data-status="check">✅</button>
+                        <button class="check-btn ${m.status === 'cross' ? 'active-cross' : ''}" data-business-status="${i}" data-status="cross">❌</button>
+                    </td>
+                    <td><button class="remove-row-btn" data-business-remove="${i}">✖</button></td>
+                </tr>
+            `).join('');
+
+            return `
+                <div style="margin-bottom:10px;font-weight:600;color:#4a3f5c;">💼 Бизнес-встречи</div>
+                <table class="mini-table">
+                    <thead><tr><th>Время</th><th>С кем</th><th>Статус</th><th></th></tr></thead>
+                    <tbody id="businessBody">${rows}</tbody>
+                </table>
+                <button class="add-row-btn" data-add-business>➕ Добавить бизнес-встречу</button>
+            `;
+        }
+
+        // ---- Персонализация ----
+        function renderPersonal(personal) {
+            let rows = personal.map((p, i) => `
+                <tr>
+                    <td><input type="text" value="${p.name}" placeholder="Имя" data-personal-name="${i}" class="personal-name"></td>
+                    <td><input type="text" value="${p.need}" placeholder="Что нужно" data-personal-need="${i}" class="personal-need"></td>
+                    <td style="text-align:center;">
+                        <button class="check-btn ${p.bought ? 'active-check' : ''}" data-personal-bought="${i}" data-bought="${p.bought}">${p.bought ? '✅' : '⬜'}</button>
+                    </td>
+                    <td><input type="number" value="${p.income}" placeholder="Доход" data-personal-income="${i}" class="personal-income" style="width:70px;"></td>
+                    <td><button class="remove-row-btn" data-personal-remove="${i}">✖</button></td>
+                </tr>
+            `).join('');
+
+            return `
+                <div style="margin-bottom:10px;font-weight:600;color:#4a3f5c;">👤 Персонализация</div>
+                <table class="mini-table">
+                    <thead><tr><th>Имя</th><th>Что нужно</th><th>Купила</th><th>Доход</th><th></th></tr></thead>
+                    <tbody id="personalBody">${rows}</tbody>
+                </table>
+                <button class="add-row-btn" data-add-personal>➕ Добавить клиента</button>
+            `;
+        }
+
+        // ---- Сканы ----
+        function renderScans(scans) {
+            return `
+                <div style="margin-bottom:10px;font-weight:600;color:#4a3f5c;">📊 Сканы</div>
+                <div class="field-row"><label>Сканов:</label><input type="number" id="scansCount" value="${scans.count}" style="width:80px;"></div>
+                <div class="field-row"><label>Записалось:</label><input type="number" id="scansRegistered" value="${scans.registered}" style="width:80px;"></div>
+                <div class="field-row"><label>Новые клиенты:</label><input type="number" id="scansNew" value="${scans.newClients}" style="width:80px;"></div>
+            `;
+        }
+
+        // ---- Доходы ----
+        function renderIncome(income) {
+            let salesRows = income.sales.map((s, i) => `
+                <tr>
+                    <td><input type="text" value="${s.name}" placeholder="Название" data-sale-name="${i}" class="sale-name"></td>
+                    <td><input type="number" value="${s.amount}" placeholder="Сумма" data-sale-amount="${i}" class="sale-amount" style="width:80px;"></td>
+                    <td><button class="remove-row-btn" data-sale-remove="${i}">✖</button></td>
+                </tr>
+            `).join('');
+
+            let totalSales = income.sales.reduce((sum, s) => sum + Number(s.amount), 0);
+
+            let expenseRows = income.expenses.map((e, i) => `
+                <tr>
+                    <td><input type="text" value="${e.name}" placeholder="Название" data-expense-name="${i}" class="expense-name"></td>
+                    <td><input type="number" value="${e.amount}" placeholder="Сумма" data-expense-amount="${i}" class="expense-amount" style="width:80px;"></td>
+                    <td><button class="remove-row-btn" data-expense-remove="${i}">✖</button></td>
+                </tr>
+            `).join('');
+
+            let totalExpenses = income.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+            let profit = totalSales - totalExpenses;
+
+            return `
+                <div style="margin-bottom:10px;font-weight:600;color:#4a3f5c;">💰 Доходы</div>
+                <div style="font-weight:500;color:#4a3f5c;margin:6px 0;">Продажи</div>
+                <table class="mini-table">
+                    <thead><tr><th>Название</th><th>Сумма (₽)</th><th></th></tr></thead>
+                    <tbody id="salesBody">${salesRows}</tbody>
+                    <tr class="sum-row"><td>ИТОГО ДОХОД:</td><td id="totalSales">${totalSales} ₽</td><td></td></tr>
+                </table>
+                <button class="add-row-btn" data-add-sale>➕ Добавить продажу</button>
+
+                <div style="font-weight:500;color:#4a3f5c;margin:12px 0 6px;">Расходы</div>
+                <table class="mini-table">
+                    <thead><tr><th>Название</th><th>Сумма (₽)</th><th></th></tr></thead>
+                    <tbody id="expensesBody">${expenseRows}</tbody>
+                    <tr class="sum-row"><td>ИТОГО РАСХОД:</td><td id="totalExpenses">${totalExpenses} ₽</td><td></td></tr>
+                </table>
+                <button class="add-row-btn" data-add-expense>➕ Добавить расход</button>
+
+                <div style="margin-top:12px;padding:10px;background:#e8f0e8;border-radius:12px;font-size:18px;font-weight:700;color:#2d5a2d;">
+                    ЧИСТАЯ ПРИБЫЛЬ: <span id="netProfit">${profit}</span> ₽
+                </div>
+            `;
+        }
+
+        // ---- Рацион ----
+        function renderMeal(meal) {
+            return `
+                <div style="margin-bottom:10px;font-weight:600;color:#4a3f5c;">🍽️ Рацион (план питания)</div>
+                <div class="meal-grid">
+                    <label>Завтрак:</label><input type="text" id="mealBreakfast" value="${meal.breakfast}" placeholder="Что съели">
+                    <label>Перекус:</label><input type="text" id="mealSnack1" value="${meal.snack1}" placeholder="Перекус">
+                    <label>Обед:</label><input type="text" id="mealLunch" value="${meal.lunch}" placeholder="Обед">
+                    <label>Перекус:</label><input type="text" id="mealSnack2" value="${meal.snack2}" placeholder="Перекус">
+                    <label>Ужин:</label><input type="text" id="mealDinner" value="${meal.dinner}" placeholder="Ужин">
+                    <label>Перекус:</label><input type="text" id="mealSnack3" value="${meal.snack3}" placeholder="Перекус">
+                    <label>💧 Вода (л):</label><input type="number" id="mealWater" value="${meal.water}" step="0.1" style="width:80px;">
+                    <label>🥩 Белок (г):</label><input type="number" id="mealProtein" value="${meal.protein}" style="width:80px;">
+                    <label>⚖️ Вес (изм. кг):</label><input type="number" id="mealWeight" value="${meal.weightChange}" step="0.1" style="width:80px;">
+                </div>
+            `;
+        }
+
+        // ---- Заметки ----
+        function renderNotes(notes) {
+            return `
+                <div style="margin-bottom:10px;font-weight:600;color:#4a3f5c;">📝 Заметки</div>
+                <textarea class="notes-area" id="notesArea" placeholder="Запишите свои мысли...">${notes}</textarea>
+            `;
+        }
+
+        // ==================== ИТОГ НЕДЕЛИ ====================
+        function renderWeekSummary() {
+            // Собираем данные за 7 дней
+            let totalSales = 0;
+            let totalExpenses = 0;
+            let totalScans = 0;
+            let totalRegistered = 0;
+            let totalNewClients = 0;
+            let totalMeetings = 0;
+            let totalBusiness = 0;
+            let totalPersonalIncome = 0;
+            let totalWeightChange = 0;
+
+            for (let i = 0; i < 7; i++) {
+                const key = getDateKey(i);
+                const data = getDayData(key);
+
+                // Доходы
+                data.income.sales.forEach(s => totalSales += Number(s.amount) || 0);
+                data.income.expenses.forEach(e => totalExpenses += Number(e.amount) || 0);
+
+                // Сканы
+                totalScans += Number(data.scans.count) || 0;
+                totalRegistered += Number(data.scans.registered) || 0;
+                totalNewClients += Number(data.scans.newClients) || 0;
+
+                // Встречи
+                data.meetings.forEach(m => { if (m.status === 'check') totalMeetings++; });
+                data.business.forEach(m => { if (m.status === 'check') totalBusiness++; });
+
+                // Персонализация (доход)
+                data.personal.forEach(p => totalPersonalIncome += Number(p.income) || 0);
+
+                // Вес
+                totalWeightChange += Number(data.meal.weightChange) || 0;
+            }
+
+            const profit = totalSales - totalExpenses;
+
+            return `
+                <div class="week-summary">
+                    <h3>📊 Итог недели</h3>
+                    <div class="summary-item"><span>💰 Всего продаж:</span><span>${totalSales} ₽</span></div>
+                    <div class="summary-item"><span>💸 Всего расходов:</span><span>${totalExpenses} ₽</span></div>
+                    <div class="summary-item total"><span>📈 Чистая прибыль:</span><span>${profit} ₽</span></div>
+                    <div class="summary-item"><span>📊 Всего сканов:</span><span>${totalScans}</span></div>
+                    <div class="summary-item"><span>📝 Записалось:</span><span>${totalRegistered}</span></div>
+                    <div class="summary-item"><span>🆕 Новых клиентов:</span><span>${totalNewClients}</span></div>
+                    <div class="summary-item"><span>✅ Состоявшихся встреч:</span><span>${totalMeetings}</span></div>
+                    <div class="summary-item"><span>✅ Бизнес-встреч:</span><span>${totalBusiness}</span></div>
+                    <div class="summary-item"><span>👤 Доход от персонализации:</span><span>${totalPersonalIncome} ₽</span></div>
+                    <div class="summary-item"><span>⚖️ Изменение веса за неделю:</span><span>${totalWeightChange.toFixed(1)} кг</span></div>
+                </div>
+            `;
+        }
+
+        // ==================== СОХРАНЕНИЕ ====================
+        function saveCurrentDay() {
+            if (currentDayIndex === 7) return;
+            const key = getDateKey(currentDayIndex);
+            const data = getDayData(key);
+
+            // Собираем данные из DOM
+            const container = document.getElementById('contentContainer');
+
+            // Встречи
+            const meetingsBody = container.querySelector('#meetingsBody');
+            if (meetingsBody) {
+                const rows = meetingsBody.querySelectorAll('tr');
+                data.meetings = [];
+                rows.forEach(row => {
+                    const timeInput = row.querySelector('.meeting-time');
+                    const withInput = row.querySelector('.meeting-with');
+                    const statusBtns = row.querySelectorAll('[data-meeting-status]');
+                    let status = '';
+                    statusBtns.forEach(btn => {
+                        if (btn.classList.contains('active-check')) status = 'check';
+                        else if (btn.classList.contains('active-cross')) status = 'cross';
+                    });
+                    if (timeInput && withInput) {
+                        data.meetings.push({
+                            time: timeInput.value || '10:00',
+                            with: withInput.value || '',
+                            status: status
+                        });
+                    }
+                });
+            }
+
+            // Бизнес
+            const businessBody = container.querySelector('#businessBody');
+            if (businessBody) {
+                const rows = businessBody.querySelectorAll('tr');
+                data.business = [];
+                rows.forEach(row => {
+                    const timeInput = row.querySelector('.business-time');
+                    const withInput = row.querySelector('.business-with');
+                    let status = '';
+                    const statusBtns = row.querySelectorAll('[data-business-status]');
+                    statusBtns.forEach(btn => {
+                        if (btn.classList.contains('active-check')) status = 'check';
+                        else if (btn.classList.contains('active-cross')) status = 'cross';
+                    });
+                    if (timeInput && withInput) {
+                        data.business.push({
+                            time: timeInput.value || '12:00',
+                            with: withInput.value || '',
+                            status: status
+                        });
+                    }
+                });
+            }
+
+            // Персонализация
+            const personalBody = container.querySelector('#personalBody');
+            if (personalBody) {
+                const rows = personalBody.querySelectorAll('tr');
+                data.personal = [];
+                rows.forEach(row => {
+                    const nameInput = row.querySelector('.personal-name');
+                    const needInput = row.querySelector('.personal-need');
+                    const boughtBtn = row.querySelector('[data-personal-bought]');
+                    const incomeInput = row.querySelector('.personal-income');
+                    if (nameInput && needInput && incomeInput) {
+                        data.personal.push({
+                            name: nameInput.value || '',
+                            need: needInput.value || '',
+                            bought: boughtBtn ? boughtBtn.dataset.bought === 'true' : false,
+                            income: Number(incomeInput.value) || 0
+                        });
+                    }
+                });
+            }
+
+            // Сканы
+            const scansCount = document.getElementById('scansCount');
+            const scansRegistered = document.getElementById('scansRegistered');
+            const scansNew = document.getElementById('scansNew');
+            if (scansCount && scansRegistered && scansNew) {
+                data.scans = {
+                    count: Number(scansCount.value) || 0,
+                    registered: Number(scansRegistered.value) || 0,
+                    newClients: Number(scansNew.value) || 0
+                };
+            }
+
+            // Доходы
+            const salesBody = container.querySelector('#salesBody');
+            if (salesBody) {
+                const rows = salesBody.querySelectorAll('tr');
+                data.income.sales = [];
+                rows.forEach(row => {
+                    const nameInput = row.querySelector('.sale-name');
+                    const amountInput = row.querySelector('.sale-amount');
+                    if (nameInput && amountInput) {
+                        data.income.sales.push({
+                            name: nameInput.value || '',
+                            amount: Number(amountInput.value) || 0
+                        });
+                    }
+                });
+            }
+
+            const expensesBody = container.querySelector('#expensesBody');
+            if (expensesBody) {
+                const rows = expensesBody.querySelectorAll('tr');
+                data.income.expenses = [];
+                rows.forEach(row => {
+                    const nameInput = row.querySelector('.expense-name');
+                    const amountInput = row.querySelector('.expense-amount');
+                    if (nameInput && amountInput) {
+                        data.income.expenses.push({
+                            name: nameInput.value || '',
+                            amount: Number(amountInput.value) || 0
+                        });
+                    }
+                });
+            }
+
+            // Рацион
+            const mealBreakfast = document.getElementById('mealBreakfast');
+            const mealSnack1 = document.getElementById('mealSnack1');
+            const mealLunch = document.getElementById('mealLunch');
+            const mealSnack2 = document.getElementById('mealSnack2');
+            const mealDinner = document.getElementById('mealDinner');
+            const mealSnack3 = document.getElementById('mealSnack3');
+            const mealWater = document.getElementById('mealWater');
+            const mealProtein = document.getElementById('mealProtein');
+            const mealWeight = document.getElementById('mealWeight');
+            if (mealBreakfast) data.meal.breakfast = mealBreakfast.value || '';
+            if (mealSnack1) data.meal.snack1 = mealSnack1.value || '';
+            if (mealLunch) data.meal.lunch = mealLunch.value || '';
+            if (mealSnack2) data.meal.snack2 = mealSnack2.value || '';
+            if (mealDinner) data.meal.dinner = mealDinner.value || '';
+            if (mealSnack3) data.meal.snack3 = mealSnack3.value || '';
+            if (mealWater) data.meal.water = Number(mealWater.value) || 0;
+            if (mealProtein) data.meal.protein = Number(mealProtein.value) || 0;
+            if (mealWeight) data.meal.weightChange = Number(mealWeight.value) || 0;
+
+            // Заметки
+            const notesArea = document.getElementById('notesArea');
+            if (notesArea) data.notes = notesArea.value || '';
+
+            saveDayData(key, data);
+        }
+
+        // ==================== СОБЫТИЯ ====================
+        function attachEvents() {
+            // Кнопки переключения дней
+            document.getElementById('prevDayBtn').onclick = () => {
+                saveCurrentDay();
+                currentDayIndex = (currentDayIndex - 1 + 8) % 8;
+                render();
+            };
+            document.getElementById('nextDayBtn').onclick = () => {
+                saveCurrentDay();
+                currentDayIndex = (currentDayIndex + 1) % 8;
+                render();
+            };
+
+            // Вкладки
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.onclick = () => {
+                    saveCurrentDay();
+                    currentTabIndex = Number(btn.dataset.tab);
+                    render();
+                };
+            });
+
+            // Добавление строк в таблицы (делегирование)
+            const container = document.getElementById('contentContainer');
+
+            // Встречи
+            container.querySelector('[data-add-meeting]')?.addEventListener('click', () => {
+                saveCurrentDay();
+                const key = getDateKey(currentDayIndex);
+                const data = getDayData(key);
+                data.meetings.push({ time: '10:00', with: '', status: '' });
+                saveDayData(key, data);
+                render();
+            });
+
+            // Бизнес
+            container.querySelector('[data-add-business]')?.addEventListener('click', () => {
+                saveCurrentDay();
+                const key = getDateKey(currentDayIndex);
+                const data = getDayData(key);
+                data.business.push({ time: '12:00', with: '', status: '' });
+                saveDayData(key, data);
+                render();
+            });
+
+            // Персонализация
+            container.querySelector('[data-add-personal]')?.addEventListener('click', () => {
+                saveCurrentDay();
+                const key = getDateKey(currentDayIndex);
+                const data = getDayData(key);
+                data.personal.push({ name: '', need: '', bought: false, income: 0 });
+                saveDayData(key, data);
+                render();
+            });
+
+            // Продажи
+            container.querySelector('[data-add-sale]')?.addEventListener('click', () => {
+                saveCurrentDay();
+                const key = getDateKey(currentDayIndex);
+                const data = getDayData(key);
+                data.income.sales.push({ name: '', amount: 0 });
+                saveDayData(key, data);
+                render();
+            });
+
+            // Расходы
+            container.querySelector('[data-add-expense]')?.addEventListener('click', () => {
+                saveCurrentDay();
+                const key = getDateKey(currentDayIndex);
+                const data = getDayData(key);
+                data.income.expenses.push({ name: '', amount: 0 });
+                saveDayData(key, data);
+                render();
+            });
+
+            // Удаление строк (делегирование)
+            container.addEventListener('click', (e) => {
+                const target = e.target.closest('[data-meeting-remove]');
+                if (target) {
+                    const idx = Number(target.dataset.meetingRemove);
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    data.meetings.splice(idx, 1);
+                    if (data.meetings.length === 0) data.meetings.push({ time: '10:00', with: '', status: '' });
+                    saveDayData(key, data);
+                    render();
+                    return;
+                }
+
+                const businessRemove = e.target.closest('[data-business-remove]');
+                if (businessRemove) {
+                    const idx = Number(businessRemove.dataset.businessRemove);
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    data.business.splice(idx, 1);
+                    if (data.business.length === 0) data.business.push({ time: '12:00', with: '', status: '' });
+                    saveDayData(key, data);
+                    render();
+                    return;
+                }
+
+                const personalRemove = e.target.closest('[data-personal-remove]');
+                if (personalRemove) {
+                    const idx = Number(personalRemove.dataset.personalRemove);
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    data.personal.splice(idx, 1);
+                    if (data.personal.length === 0) data.personal.push({ name: '', need: '', bought: false, income: 0 });
+                    saveDayData(key, data);
+                    render();
+                    return;
+                }
+
+                const saleRemove = e.target.closest('[data-sale-remove]');
+                if (saleRemove) {
+                    const idx = Number(saleRemove.dataset.saleRemove);
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    data.income.sales.splice(idx, 1);
+                    if (data.income.sales.length === 0) data.income.sales.push({ name: '', amount: 0 });
+                    saveDayData(key, data);
+                    render();
+                    return;
+                }
+
+                const expenseRemove = e.target.closest('[data-expense-remove]');
+                if (expenseRemove) {
+                    const idx = Number(expenseRemove.dataset.expenseRemove);
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    data.income.expenses.splice(idx, 1);
+                    if (data.income.expenses.length === 0) data.income.expenses.push({ name: '', amount: 0 });
+                    saveDayData(key, data);
+                    render();
+                    return;
+                }
+
+                // Статусы (галочки/крестики) для встреч
+                const statusBtn = e.target.closest('[data-meeting-status]');
+                if (statusBtn) {
+                    const idx = Number(statusBtn.dataset.meetingStatus);
+                    const status = statusBtn.dataset.status;
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    if (data.meetings[idx]) {
+                        data.meetings[idx].status = data.meetings[idx].status === status ? '' : status;
+                        saveDayData(key, data);
+                        render();
+                    }
+                    return;
+                }
+
+                // Статусы для бизнеса
+                const businessStatus = e.target.closest('[data-business-status]');
+                if (businessStatus) {
+                    const idx = Number(businessStatus.dataset.businessStatus);
+                    const status = businessStatus.dataset.status;
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    if (data.business[idx]) {
+                        data.business[idx].status = data.business[idx].status === status ? '' : status;
+                        saveDayData(key, data);
+                        render();
+                    }
+                    return;
+                }
+
+                // Купила (персонализация)
+                const boughtBtn = e.target.closest('[data-personal-bought]');
+                if (boughtBtn) {
+                    const idx = Number(boughtBtn.dataset.personalBought);
+                    saveCurrentDay();
+                    const key = getDateKey(currentDayIndex);
+                    const data = getDayData(key);
+                    if (data.personal[idx]) {
+                        data.personal[idx].bought = !data.personal[idx].bought;
+                        saveDayData(key, data);
+                        render();
+                    }
+                    return;
+                }
+            });
+
+            // Автосохранение при изменении полей (input)
+            container.addEventListener('input', () => {
+                // Сохраняем с небольшой задержкой, чтобы не перегружать
+                clearTimeout(window._saveTimeout);
+                window._saveTimeout = setTimeout(() => {
+                    saveCurrentDay();
+                    // Обновляем итоги доходов в реальном времени
+                    updateIncomeTotals();
+                }, 300);
+            });
+
+            // Сохраняем при потере фокуса
+            container.addEventListener('blur', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    saveCurrentDay();
+                    updateIncomeTotals();
+                }
+            }, true);
+        }
+
+        // ==================== ОБНОВЛЕНИЕ ИТОГОВ ДОХОДОВ ====================
+        function updateIncomeTotals() {
+            const container = document.getElementById('contentContainer');
+            if (!container) return;
+
+            // Продажи
+            const salesBody = container.querySelector('#salesBody');
+            if (salesBody) {
+                let total = 0;
+                salesBody.querySelectorAll('.sale-amount').forEach(input => {
+                    total += Number(input.value) || 0;
+                });
+                const totalEl = document.getElementById('totalSales');
+                if (totalEl) totalEl.textContent = total + ' ₽';
+            }
+
+            // Расходы
+            const expensesBody = container.querySelector('#expensesBody');
+            if (expensesBody) {
+                let total = 0;
+                expensesBody.querySelectorAll('.expense-amount').forEach(input => {
+                    total += Number(input.value) || 0;
+                });
+                const totalEl = document.getElementById('totalExpenses');
+                if (totalEl) totalEl.textContent = total + ' ₽';
+            }
+
+            // Чистая прибыль
+            const salesTotal = document.getElementById('totalSales');
+            const expensesTotal = document.getElementById('totalExpenses');
+            const profitEl = document.getElementById('netProfit');
+            if (salesTotal && expensesTotal && profitEl) {
+                const sales = Number(salesTotal.textContent.replace(' ₽', '')) || 0;
+                const expenses = Number(expensesTotal.textContent.replace(' ₽', '')) || 0;
+                profitEl.textContent = (sales - expenses) + ' ₽';
+            }
+        }
+
+        // ==================== ОБНОВЛЕНИЕ ИТОГА НЕДЕЛИ ====================
+        function updateWeekSummary() {
+            // Итог недели обновляется при рендере
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        render();
+
+        // Автосохранение при выходе
+        window.addEventListener('beforeunload', () => {
+            saveCurrentDay();
+        });
+
+        // Сохранение при сворачивании
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                saveCurrentDay();
+            }
+        });
+
+        console.log('📒 Бизнес дневник загружен!');
+        console.log('Иконка: icon-business-diary.png (замените на свою)');
+    })();
+</script>
+</body>
+</html>
